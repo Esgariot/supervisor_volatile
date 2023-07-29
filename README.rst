@@ -1,4 +1,4 @@
-supervisor_twiddler
+supervisor_volatile
 ===================
 
 This package is an RPC extension for `Supervisor <http://supervisord.org>`_
@@ -8,32 +8,32 @@ that are not normally possible at runtime.
 Installation
 ------------
 
-supervisor_twiddler packages are
-`available on PyPI <http://pypi.python.org/pypi/supervisor_twiddler>`_.
+supervisor_volatile packages are
+`available on PyPI <http://pypi.python.org/pypi/supervisor_volatile>`_.
 You download them from there or you can use ``pip`` to
 automatically install or upgrade:
 
 .. code-block:: bash
 
-    $ pip install -U supervisor_twiddler
+    $ pip install -U supervisor_volatile
 
 After installing the package, add these lines to your ``supervisord.conf`` file
-to register the twiddler interface:
+to register the volatile interface:
 
 .. code-block:: ini
 
-    [rpcinterface:twiddler]
-    supervisor.rpcinterface_factory = supervisor_twiddler.rpcinterface:make_twiddler_rpcinterface
+    [rpcinterface:volatile]
+    supervisor.rpcinterface_factory = supervisor_volatile.rpcinterface:make_volatile_rpcinterface
 
-You must restart Supervisor for the twiddler interface to be loaded.
+You must restart Supervisor for the volatile interface to be loaded.
 
 Usage
 -----
 
 There are times when it is useful to be able to dynamically add and remove
 process configurations on a supervisord instance. This is the functionality
-that supervisor_twiddler provides. After restarting supervisord, the changes
-made by supervisor_twiddler will not persist.
+that supervisor_volatile provides. After restarting supervisord, the changes
+made by supervisor_volatile will not persist.
 
 The following Python interpreter session demonstrates the usage.
 
@@ -57,13 +57,13 @@ URL to appease ServerProxy, but it is superfluous.
     ... SupervisorTransport('', '', 'unix:///path/to/supervisor.sock'))
 
 Once `ServerProxy` has been configured appropriately, we can now exercise
-supervisor_twiddler:
+supervisor_volatile:
 
 .. code-block:: python
 
-    >>> s.twiddler.getAPIVersion()
+    >>> s.volatile.getAPIVersion()
     '0.1'
-    >>> s.twiddler.addProgramToGroup('group_name', 'ls', {'command':'ls -l',
+    >>> s.volatile.addProgramToGroup('group_name', 'ls', {'command':'ls -l',
     ... 'autostart':'false', 'autorestart':'false', 'startsecs':'0'})
     True
     >>> s.supervisor.startProcess('group_name:ls')
@@ -90,14 +90,14 @@ Testing the API Version
 -----------------------
 
 All RPC extensions for Supervisor follow a convention where a method called
-`getAPIVersion()` is available. supervisor_twiddler provides this:
+`getAPIVersion()` is available. supervisor_volatile provides this:
 
 .. code-block:: python
 
-    twiddler.getAPIVersion()
+    volatile.getAPIVersion()
 
 It is highly recommended that when you develop software that uses
-supervisor_twiddler, you test the API version before making method calls.
+supervisor_volatile, you test the API version before making method calls.
 
 Listing Process Groups
 ----------------------
@@ -107,11 +107,11 @@ Process groups are defined in supervisord.conf as group sections. Assume
 
 .. code-block:: python
 
-    twiddler.getGroupNames()
+    volatile.getGroupNames()
 
 The return value would then return an array: `["foo", "bar"]`. It is possible
-to use supervisor_twiddler to add new process groups at runtime, and these
-will also be included in the results returned by `twiddler.getGroupNames()`.
+to use supervisor_volatile to add new process groups at runtime, and these
+will also be included in the results returned by `volatile.getGroupNames()`.
 
 Adding Process Groups
 ---------------------
@@ -121,11 +121,11 @@ sections in supervisord.conf with no `programs=` entries under them. However, it
 is not possible to add new empty process groups after supervisord has been
 started.
 
-The `twiddler.addGroup()` method adds an empty process group. It takes two
+The `volatile.addGroup()` method adds an empty process group. It takes two
 parameters: the name of the new group as a string, and its priority as an
 integer:
 
-    twiddler.addGroup("foos", 999)
+    volatile.addGroup("foos", 999)
 
 The first parameter (`foos`) is the name of the new process group. The second
 parameter (`999`) is the group's priority, like in supervisord.conf.
@@ -134,7 +134,7 @@ The method call above will create a new, empty process group named `foos`. You
 can then populate this group with processes using `twidder.addProgramToGroup()`.
 
 It is not yet possible to remove a process group, but this is planned for a
-future release of `supervisor_twiddler`.
+future release of `supervisor_volatile`.
 
 Adding a New Program to a Group
 -------------------------------
@@ -142,13 +142,13 @@ Adding a New Program to a Group
 In supervisord.conf, a `[program:x]` section will result in one or more
 processes, depending on `numprocs` and named by `process_name`.
 
-The `twiddler.addProgramToGroup()` method makes it possible to add a new program
+The `volatile.addProgramToGroup()` method makes it possible to add a new program
 to a group (resulting in one or more processes) and then control these
 processes as if they had existed originally in `supervisord.conf`.
 
 .. code:: python
 
-    twiddler.addProgramToGroup("group_name", "foo",
+    volatile.addProgramToGroup("group_name", "foo",
       {"command": "/usr/bin/foo"})
 
 The first parameter (`group_name`) is the group name where the new process will
@@ -180,11 +180,11 @@ Removing a Process from a Group
 -------------------------------
 
 When processes are no longer needed in the supervisord runtime configuration,
-the `twiddler.removeProcessFromGroup()` method can be used:
+the `volatile.removeProcessFromGroup()` method can be used:
 
 .. code:: python
 
-    twiddler.removeProcessFromGroup("group_name", "process_name")
+    volatile.removeProcessFromGroup("group_name", "process_name")
 
 To be removed, the process must not be running. It must have terminated on its
 own or have been stopped with `supervisor.stopProcess()`.
@@ -192,13 +192,13 @@ own or have been stopped with `supervisor.stopProcess()`.
 Logging a Message
 -----------------
 
-The `twiddler.log()` method allows you to write arbitrary messages to
+The `volatile.log()` method allows you to write arbitrary messages to
 Supervisor's main log. When you twiddle with Supervisor's configuration, this
 method is useful for logging messages about what was done.
 
 .. code:: python
 
-    twiddler.log("This is an informational message", "INFO")
+    volatile.log("This is an informational message", "INFO")
 
 The first argument is a string message to write to the log. The second
 argument is the log level and is optional (defaults to `INFO`). The log level
@@ -215,7 +215,7 @@ Any changes to the supervisord runtime configuration will not be persisted
 after Supervisor is shut down.
 
 Your Supervisor instance should never be exposed to the outside world. With
-supervisor_twiddler, anyone with access to the API has the ability to run
+supervisor_volatile, anyone with access to the API has the ability to run
 arbitrary commands on the server.
 
 Author

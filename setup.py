@@ -7,10 +7,10 @@ py_version = sys.version_info[:2]
 
 if py_version < (2, 7):
     raise RuntimeError(
-        'On Python 2, supervisor_twiddler requires Python 2.7 or later')
+        'On Python 2, supervisor_volatile requires Python 2.7 or later')
 elif (3, 0) < py_version < (3, 2):
     raise RuntimeError(
-        'On Python 3, supervisor_twiddler requires Python 3.2 or later')
+        'On Python 3, supervisor_volatile requires Python 3.2 or later')
 
 tests_require = []
 if py_version < (3, 3):
@@ -20,7 +20,7 @@ from setuptools import setup, find_packages
 here = os.path.abspath(os.path.dirname(__file__))
 
 DESC = """\
-supervisor_twiddler is an RPC extension for Supervisor that allows
+supervisor_volatile is an RPC extension for Supervisor that allows
 Supervisor's configuration and state to be manipulated in ways that are not
 normally possible at runtime."""
 
@@ -42,11 +42,11 @@ CLASSIFIERS = [
     ]
 
 setup(
-    name = 'supervisor_twiddler',
+    name = 'supervisor_volatile',
     version = __version__,
     license = 'License :: OSI Approved :: BSD License',
-    url = 'http://github.com/mnaberez/supervisor_twiddler',
-    description = "supervisor_twiddler RPC extension for Supervisor",
+    url = 'http://github.com/esgariot/supervisor_volatile',
+    description = "supervisor_volatile RPC extension for Supervisor",
     long_description= DESC,
     classifiers = CLASSIFIERS,
     author = "Mike Naberezny",
@@ -58,6 +58,6 @@ setup(
     tests_require = tests_require,
     include_package_data = True,
     zip_safe = False,
-    namespace_packages = ['supervisor_twiddler'],
-    test_suite = 'supervisor_twiddler.tests'
+    namespace_packages = ['supervisor_volatile'],
+    test_suite = 'supervisor_volatile.tests'
 )

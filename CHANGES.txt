@@ -16,7 +16,7 @@
 
   [eventlistener:process_comm_listener]
   events=PROCESS_COMMUNICATION_STDOUT
-  result_handler=supervisor_twiddler.resulthandler:stdin_write_handler
+  result_handler=supervisor_volatile.resulthandler:stdin_write_handler
   ...
 
 0.3 (14-May-2010)
@@ -29,8 +29,8 @@
   the whitelist will be accessible.  If the whitelist is
   not used or empty, all methods will be accessible.
 
-    [rpcinterface:twiddler]
-    supervisor.rpcinterface_factory = supervisor_twiddler.rpcinterface:make_twiddler_rpcinterface
+    [rpcinterface:volatile]
+    supervisor.rpcinterface_factory = supervisor_volatile.rpcinterface:make_volatile_rpcinterface
     whitelist = getAPIVersion,getGroupNames
 
   When the whitelist is used, all methods will still appear in

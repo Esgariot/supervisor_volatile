@@ -5,7 +5,7 @@ import supervisor
 from supervisor.xmlrpc import Faults as SupervisorFaults
 from supervisor.states import SupervisorStates, ProcessStates
 
-from supervisor_twiddler.rpcinterface import Faults as TwiddlerFaults
+from supervisor_volatile.rpcinterface import Faults as VolatileFaults
 
 from supervisor.tests.base import DummySupervisor
 from supervisor.tests.base import DummyPConfig, DummyProcess
@@ -15,19 +15,19 @@ class TestRPCInterface(unittest.TestCase):
 
     # Fault Constants
 
-    def test_twiddler_fault_names_dont_clash_with_supervisord_fault_names(self):
+    def test_volatile_fault_names_dont_clash_with_supervisord_fault_names(self):
         supervisor_faults = self.attrDictWithoutUnders(SupervisorFaults)
-        twiddler_faults = self.attrDictWithoutUnders(TwiddlerFaults)
+        volatile_faults = self.attrDictWithoutUnders(VolatileFaults)
 
         for name in supervisor_faults.keys():
-            self.assertTrue(twiddler_faults.get(name) is None)
+            self.assertTrue(volatile_faults.get(name) is None)
 
-    def test_twiddler_fault_codes_dont_clash_with_supervisord_fault_codes(self):
+    def test_volatile_fault_codes_dont_clash_with_supervisord_fault_codes(self):
         supervisor_fault_codes = self.attrDictWithoutUnders(SupervisorFaults).values()
-        twiddler_fault_codes = self.attrDictWithoutUnders(TwiddlerFaults).values()
+        volatile_fault_codes = self.attrDictWithoutUnders(VolatileFaults).values()
 
         for code in supervisor_fault_codes:
-            self.assertFalse(code in twiddler_fault_codes)
+            self.assertFalse(code in volatile_fault_codes)
 
     # Constructor
 
@@ -39,14 +39,14 @@ class TestRPCInterface(unittest.TestCase):
 
     # Factory
 
-    def test_make_twiddler_rpcinterface_factory(self):
-        from supervisor_twiddler import rpcinterface
+    def test_make_volatile_rpcinterface_factory(self):
+        from supervisor_volatile import rpcinterface
 
         supervisord = DummySupervisor()
-        interface = rpcinterface.make_twiddler_rpcinterface(supervisord)
+        interface = rpcinterface.make_volatile_rpcinterface(supervisord)
 
         self.assertTrue(isinstance(interface,
-            rpcinterface.TwiddlerNamespaceRPCInterface))
+            rpcinterface.SupervisorVolatileRPCInterface))
         self.assertEqual(supervisord, interface.supervisord)
 
     # Updater
@@ -58,13 +58,13 @@ class TestRPCInterface(unittest.TestCase):
         self.assertRPCError(SupervisorFaults.SHUTDOWN_STATE,
                             interface.getAPIVersion)
 
-    # API Method twiddler.getAPIVersion()
+    # API Method volatile.getAPIVersion()
 
     def test_getAPIVersion_can_be_disabled(self):
         supervisord = DummySupervisor()
         interface = self.makeOne(supervisord, whitelist='foo,bar')
 
-        self.assertRPCError(TwiddlerFaults.NOT_IN_WHITELIST,
+        self.assertRPCError(VolatileFaults.NOT_IN_WHITELIST,
                             interface.getAPIVersion)
 
     def test_getAPIVersion_returns_api_version(self):
@@ -74,16 +74,16 @@ class TestRPCInterface(unittest.TestCase):
         version = interface.getAPIVersion()
         self.assertEqual('getAPIVersion', interface.update_text)
 
-        from supervisor_twiddler.rpcinterface import API_VERSION
+        from supervisor_volatile.rpcinterface import API_VERSION
         self.assertEqual(version, API_VERSION)
 
-    # API Method twiddler.getGroupNames()
+    # API Method volatile.getGroupNames()
 
     def test_getGroupNames_can_be_disabled(self):
         supervisord = DummySupervisor()
         interface = self.makeOne(supervisord, whitelist='foo,bar')
 
-        self.assertRPCError(TwiddlerFaults.NOT_IN_WHITELIST,
+        self.assertRPCError(VolatileFaults.NOT_IN_WHITELIST,
                             interface.getGroupNames)
 
     def test_getGroupNames_returns_empty_array_when_no_groups(self):
@@ -109,13 +109,13 @@ class TestRPCInterface(unittest.TestCase):
         names.index('foo')
         names.index('bar')
 
-    # API Method twiddler.addEmptyGroup()
+    # API Method volatile.addEmptyGroup()
 
     def test_addEmptyGroup_can_be_disabled(self):
         supervisord = DummySupervisor()
         interface = self.makeOne(supervisord, whitelist='foo,bar')
         
-        self.assertRPCError(TwiddlerFaults.NOT_IN_WHITELIST, 
+        self.assertRPCError(VolatileFaults.NOT_IN_WHITELIST, 
                             interface.addEmptyGroup, 'foo', 999)
     
     def test_addEmptyGroup_raises_bad_name_when_group_name_already_exists(self):
@@ -152,13 +152,13 @@ class TestRPCInterface(unittest.TestCase):
         self.assertEquals(42, config.priority)
         self.assertEquals([], config.process_configs)
     
-    # API Method twiddler.addProgramToGroup()
+    # API Method volatile.addProgramToGroup()
 
     def test_addProgramToGroup_can_be_disabled(self):
         supervisord = DummySupervisor()
         interface = self.makeOne(supervisord, whitelist='foo,bar')
 
-        self.assertRPCError(TwiddlerFaults.NOT_IN_WHITELIST,
+        self.assertRPCError(VolatileFaults.NOT_IN_WHITELIST,
                             interface.addProgramToGroup, 'grp', 'prog', {})
 
     def test_addProgramToGroup_raises_bad_name_when_group_doesnt_exist(self):
@@ -294,13 +294,13 @@ class TestRPCInterface(unittest.TestCase):
         self.assertEqual(3, len(pgroup.config.process_configs))
         self.assertEqual(3, len(pgroup.processes))
 
-    # API Method twiddler.removeProcessFromGroup()
+    # API Method volatile.removeProcessFromGroup()
 
     def test_removeProcessFromGroup_can_be_disabled(self):
         supervisord = DummySupervisor()
         interface = self.makeOne(supervisord, whitelist='foo,bar')
 
-        self.assertRPCError(TwiddlerFaults.NOT_IN_WHITELIST,
+        self.assertRPCError(VolatileFaults.NOT_IN_WHITELIST,
                             interface.removeProcessFromGroup, 'group', 'process')
 
     def test_removeProcessFromGroup_raises_bad_name_when_group_doesnt_exist(self):
@@ -375,13 +375,13 @@ class TestRPCInterface(unittest.TestCase):
         self.assertTrue(pgroup.processes.get('process_name') is None)
         self.assertEqual('removeProcessFromGroup', interface.update_text)
 
-    # API Method twiddler.log()
+    # API Method volatile.log()
 
     def test_log_can_be_disabled(self):
         supervisord = DummySupervisor()
         interface = self.makeOne(supervisord, whitelist='foo,bar')
 
-        self.assertRPCError(TwiddlerFaults.NOT_IN_WHITELIST,
+        self.assertRPCError(VolatileFaults.NOT_IN_WHITELIST,
                             interface.log, 'message')
 
     def test_log_write_message_when_level_is_string(self):
@@ -419,8 +419,8 @@ class TestRPCInterface(unittest.TestCase):
     # Helpers Methods
 
     def getTargetClass(self):
-        from supervisor_twiddler.rpcinterface import TwiddlerNamespaceRPCInterface
-        return TwiddlerNamespaceRPCInterface
+        from supervisor_volatile.rpcinterface import SupervisorVolatileRPCInterface
+        return SupervisorVolatileRPCInterface
 
     def makeOne(self, *arg, **kw):
         return self.getTargetClass()(*arg, **kw)

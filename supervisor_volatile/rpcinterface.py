@@ -11,7 +11,7 @@ API_VERSION = '1.0'
 class Faults:
     NOT_IN_WHITELIST = 230
 
-class TwiddlerNamespaceRPCInterface:
+class SupervisorVolatileRPCInterface:
     """ A supervisor rpc interface that facilitates manipulation of
     supervisor's configuration and state in ways that are not
     normally accessible at runtime.
@@ -34,7 +34,7 @@ class TwiddlerNamespaceRPCInterface:
     # RPC API methods
 
     def getAPIVersion(self):
-        """ Return the version of the RPC API used by supervisor_twiddler
+        """ Return the version of the RPC API used by supervisor_volatile
 
         @return int version version id
         """
@@ -195,5 +195,5 @@ class TwiddlerNamespaceRPCInterface:
             raise RPCError(SupervisorFaults.INCORRECT_PARAMETERS)
         return config
 
-def make_twiddler_rpcinterface(supervisord, **config):
-    return TwiddlerNamespaceRPCInterface(supervisord, **config)
+def make_volatile_rpcinterface(supervisord, **config):
+    return SupervisorVolatileRPCInterface(supervisord, **config)
